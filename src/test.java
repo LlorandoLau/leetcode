@@ -1102,25 +1102,6 @@ public class test {
 //        return l;
 //    }
 
-    public String customSortString(String S, String T) {
-        Map<Character, Integer> map = new HashMap<>();
-        int len = 0;
-        for (int i = 0; i < len; i++) {
-            map.put(S.charAt(i), i);
-        }
-        len = T.length();
-        List<Character> list = new ArrayList<>();
-        for (int i = 0; i < len; i++) {
-            list.add(T.charAt(i));
-        }
-        Collections.sort(list, new c(map));
-        StringBuffer sb = new StringBuffer();
-        for (Character c : list) {
-            sb.append(c);
-        }
-        return sb.toString();
-    }
-
     public boolean contains(int[] arr, int val) {
         int len = arr.length;
         for (int i = 0; i < len; i++) {
@@ -1436,12 +1417,6 @@ public class test {
         }
         return true;
     }
-
-    public String originalDigits(String s) {
-        String[] nums = {"zero", "one", "two", "three", "four", "five", "six", "" +
-                "seven", "eight", "nine"}
-    }
-
     public List<Integer> getRow(int rowIndex) {
         List<Integer> list = new ArrayList<>();
         for (int i = 0; i <= rowIndex; i++) {
@@ -1658,26 +1633,6 @@ public class test {
         int len = s.length();
         for (int i = 0; i < len; i++) {
             if (!list.contains(s.charAt(i))) return false;
-        }
-        return true;
-    }
-
-    public boolean isNStraightHand(int[] hand, int W) {
-        int len = hand.length;
-        Arrays.sort(hand);
-        if (len % W != 0) return false;
-        for (int i = 0; i < len; i += W) {
-            int[] arr = new int[W];
-            System.arraycopy(hand, i, arr, 0, W);
-            if (!isStraighHand(arr)) return false;
-        }
-        return true;
-    }
-
-    public boolean isStraighHand(int[] hand) {
-        int len = hand.length;
-        for (int i = 1; i < len; i++) {
-            if (hand[i] - hand[i - 1] != 1) return false;
         }
         return true;
     }
@@ -2282,10 +2237,6 @@ public class test {
         return max;
     }
 
-    public List<Integer> countSmaller(int[] nums) {
-        int len = nums.length;
-        int[] temp = new int[]
-    }
 
     public boolean sameEle(int[] A, int[] B, int alen, int blen, int i, int j, int length) {
         i = i + length;
@@ -3579,13 +3530,6 @@ public class test {
         return max;
     }
 
-    public void rotate(int[] nums, int k) {
-        int[] newone = new int[nums.length];
-        System.arraycopy(nums, nums.length - k, newone, 0, k);
-        System.arraycopy(nums, 0, newone, k, nums.length - k);
-        nums = newone;
-    }
-
     public int thirdMax(int[] nums) {
         if (nums.length < 3) {
             Arrays.sort(nums);
@@ -4178,16 +4122,103 @@ public class test {
         return true;
     }
 
-    class c implements Comparator {
-        Map<Character, Integer> map;
+    public Map<Character, Character> init() {
+        Map<Character, Character> map = new HashMap<>();
+        map.put('}', '{');
+        map.put(')', '(');
+        map.put(']', '[');
+        return map;
+    }
 
-        public c(Map<Character, Integer> map) {
-            this.map = map;
+    public boolean isValid(String s) {
+        Stack<Character> stack = new Stack<>();
+        int len = s.length();
+        char[] arr = s.toCharArray();
+        Map<Character, Character> map = init();
+        for (int i = 0; i < len; i++) {
+            char fir = arr[i];
+            if (fir == '(' || fir == '{' || fir == '[') stack.push(fir);
+            else if (!map.get(fir).equals(stack.peek())) return false;
+            else stack.pop();
         }
+        return stack.isEmpty();
+    }
 
-        @Override
-        public int compare(Object o1, Object o2) {
-            return map.get(o1).compareTo(map.get(o2));
+    public boolean canPartition(int[] nums) {
+        int sum = 0;
+        int len = nums.length;
+        for (int i = 0; i < len; i++) sum += nums[0];
+        return sum % 2 == 0;
+    }
+
+    public int minSteps(int n) {
+        int count = 1;
+        int sum = 1;
+        while (Math.pow(sum, 2) < n) {
+            sum = (int) Math.pow(sum, 2);
+            count++;
         }
+        return count + n - sum;
+    }
+
+    //692
+    public List<String> topKFrequent(String[] words, int k) {
+        List<String> ans = new ArrayList<String>();
+        Map<String, Integer> map = new HashMap<String, Integer>();
+        for (String word : words) {
+            if (!map.containsKey(word)) {
+                map.put(word, 1);
+            } else {
+                map.put(word, map.get(word) + 1);
+            }
+        }
+        List<Map.Entry<String, Integer>> list = new ArrayList();
+        for (Map.Entry<String, Integer> entry : map.entrySet()) {
+            list.add(entry);//排序
+        }
+        Collections.sort(list, new Comparator<Map.Entry<String, Integer>>() {
+            @Override
+            public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
+                if (o1.getValue().compareTo(o2.getValue()) == 0) return o1.getKey().compareTo(o2.getKey());
+                return o2.getValue().compareTo(o1.getValue());
+            }
+        });
+        for (int i = 0; i < k; i++) {
+            ans.add(list.get(i).getKey());
+        }
+        return ans;
+    }
+
+    public int firstMissingPositive(int[] nums) {
+        Arrays.sort(nums);
+        int index = 0;
+        int len = nums.length;
+        if (len == 0) return 1;
+        while (index < len && nums[index] <= 0) index++;
+        for (int i = index; i < len; i++) {
+            if (i == index && nums[i] != 1) return 1;
+            else if (i > index && nums[i] > nums[i - 1] && nums[i] - nums[i - 1] != 1) return nums[i - 1] + 1;
+        }
+        return nums[len - 1] + 1;
+    }
+
+    //846
+    public boolean isNStraightHand(int[] hand, int W) {
+        Arrays.sort(hand);
+        int len = hand.length;
+        if (len % W != 0) return false;
+        List<Integer> list = new ArrayList<>();
+        for (int num : hand) list.add(num);
+        while (!list.isEmpty()) {
+            int val = list.get(0);
+            for (int i = 1; i < W; i++) {
+                int temp = val + i;
+                if (!list.contains(temp)) return false;
+                list.remove((Integer) temp);
+            }
+            list.remove((Integer) val);
+            list.removeAll(Collections.singleton(null));
+        }
+        return true;
     }
 }
