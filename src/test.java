@@ -4367,4 +4367,124 @@ public class test {
         }
         return fir == slen && sec == plen;
     }
+
+    //767. 重构字符串
+    public String reorganizeString(String S) {
+        int[] times = new int[26];
+        int len = S.length();
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < len; i++) {
+            times[S.charAt(i) - 'a']++;
+        }
+        PriorityQueue<Pair> q = new PriorityQueue<>(new Comparator<Pair>() {
+            @Override
+            public int compare(Pair o1, Pair o2) {
+                return o2.times - o1.times;
+            }
+        });
+        for (int i = 0; i < 26; i++) {
+            if (times[i] > (S.length() + 1) / 2) return "";
+            if (times[i] != 0) q.add(new Pair((char) (i + 'a'), times[i]));
+        }
+        while (q.size() >= 2) {
+            Pair p1 = q.poll();
+            Pair p2 = q.poll();
+            sb.append(p1.c).append(p2.c);
+            if (--p1.times > 0) q.add(p1);
+            if (--p2.times > 0) q.add(p2);
+        }
+        if (q.size() > 0) sb.append(q.poll().c);
+        ;
+        return sb.toString();
+    }
+
+    //241. 为运算表达式设计优先级
+    public List<Integer> diffWaysToCompute(String input) {
+        List<Integer> list = new ArrayList<>();
+        int len = input.length();
+        for (int i = 0; i < len; i++) {
+            char c = input.charAt(i);
+            if (c == '+' || c == '-' || c == '*') {
+                List<Integer> l1 = diffWaysToCompute(input.substring(0, i));
+                List<Integer> l2 = diffWaysToCompute(input.substring(i + 1));
+                for (int r : l1) {
+                    for (int r2 : l2) {
+                        if (c == '+') list.add(r + r2);
+                        if (c == '-') list.add(r - r2);
+                        if (c == '*') list.add(r * r2);
+                    }
+                }
+            }
+        }
+        if (list.isEmpty()) list.add(Integer.parseInt(input));
+        return list;
+    }
+
+    //95. 不同的二叉搜索树 II
+    public List<TreeNode> generateTrees(int n) {
+        if (n == 0) return new ArrayList<>();
+        return generateTrees(1, n);
+    }
+
+    public List<TreeNode> generateTrees(int start, int end) {
+        List<TreeNode> subTree = new ArrayList<>();
+        if (start <= end) {
+            for (int i = start; i <= end; i++) {
+                List<TreeNode> leftSubTree = generateTrees(start, i - 1);
+                List<TreeNode> rightSubTree = generateTrees(i + 1, end);
+                for (int j = 0; j < leftSubTree.size(); j++) {
+                    for (int k = 0; k < rightSubTree.size(); k++) {
+                        TreeNode node = new TreeNode(i);
+                        node.left = leftSubTree.get(j);
+                        node.right = rightSubTree.get(k);
+                        subTree.add(node);
+                    }
+                }
+            }
+        } else subTree.add(null);
+        return subTree;
+    }
+
+    public int numTrees(int sum) {
+        int[] arr = new int[sum + 1];
+        arr[0] = 1;
+        arr[1] = 1;
+        for (int n = 2; n <= sum; n++) {
+            for (int i = 0; i < n; i++) {
+                arr[n] += arr[i] * arr[n - i - 1];
+            }
+        }
+        return arr[sum];
+    }
+
+    //22. 括号生成
+    public List<String> generateParenthesis(int n) {
+        List<String> list = new ArrayList<>();
+        generateParenthesis(list, n, n, "");
+        return list;
+    }
+
+    public void generateParenthesis(List<String> list, int left, int right, String path) {
+        if (left == 0 && right == 0) {
+            list.add(path);
+            return;
+        }
+        if (left != 0) generateParenthesis(list, left - 1, right, path + "(");
+        if (right != 0 && right > left) generateParenthesis(list, left, right - 1, path + ")");
+    }
+
+    class Pair {
+        char c;
+        int times;
+
+        public Pair(char c, int times) {
+            this.c = c;
+            this.times = times;
+        }
+
+        @Override
+        public String toString() {
+            return c + " " + times;
+        }
+    }
 }
