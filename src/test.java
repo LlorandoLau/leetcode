@@ -1417,6 +1417,7 @@ public class test {
         }
         return true;
     }
+
     public List<Integer> getRow(int rowIndex) {
         List<Integer> list = new ArrayList<>();
         for (int i = 0; i <= rowIndex; i++) {
@@ -1889,26 +1890,6 @@ public class test {
             max = Integer.max(sum, max);
         }
         return max;
-    }
-
-    public int numSubarrayProductLessThanK(int[] nums, int k) {
-        Arrays.sort(nums);
-        int len = nums.length;
-        int count = 0;
-        for (int i = 0; i < len; i++) {
-            System.out.print(nums[i] + " ");
-            int sum = nums[i];
-            if (sum < k) count++;
-            else continue;
-            for (int j = i + 1; j < len; j++) {
-                System.out.print(nums[j] + " ");
-                sum *= nums[j];
-                if (sum < k) count++;
-                else break;
-            }
-            System.out.println(count);
-        }
-        return count;
     }
 
     public int maxProduct(int[] nums) {
@@ -4220,5 +4201,170 @@ public class test {
             list.removeAll(Collections.singleton(null));
         }
         return true;
+    }//450
+
+    public TreeNode deleteNode(TreeNode root, int key) {
+        if (root == null) return root;
+        //递归查找对应的节点
+        if (root.val > key) root.left = deleteNode(root.left, key);
+        else if (root.val < key) root.right = deleteNode(root.right, key);
+        else {   //找到节点
+            if (root.left == null | root.right == null) root = root.left != null ? root.left : root.right;  //1
+            else {
+                TreeNode cur = root.right;
+                while (cur.left != null) cur = cur.left;   //右子树的最小节点作为根节点
+                root.val = cur.val;   //上移的节点在1步删除
+                root.right = deleteNode(root.right, cur.val);  //2，查找冗余节点并删除
+            }
+        }
+        return root;
+    }
+
+    //560. 和为K的子数组
+    public int subarraySum(int[] nums, int k) {
+        int len = nums.length;
+        int count = 0;
+        for (int i = 0; i < len; i++) {
+            int sum = 0;
+            for (int j = i; j < len; j++) {
+                sum += nums[j];
+                if (sum == k) count++;
+            }
+        }
+        return count;
+    }
+
+    //523. 连续的子数组和
+    public boolean checkSubarraySum(int[] nums, int k) {
+        int len = nums.length;
+        for (int i = 0; i < len; i++) {
+            int sum = 0;
+            for (int j = i; j < len; j++) {
+                sum += nums[j];
+                if (j - i + 1 >= 2) {
+                    if (sum == 0 && k == 0) return true;    //[0,0,0,0] 0
+                    else if (k == 0) return false;       //放在中间,避免整除0的错误[23,3,2,4,56,3]   0
+                    else if (sum % k == 0) return true;    //[2,3,5,1,65,3]    1
+                }
+            }
+        }
+        return false;
+    }
+
+    //441. 排列硬币
+    public int arrangeCoins(int n) {
+        return (int) ((Math.sqrt(8 * (long) n + 1) - 1) / 2);
+    }
+
+    //222. 完全二叉树的节点个数
+    public int countNodes(TreeNode root) {
+        if (root == null) return 0;
+        int leftDepth = depth(root, true);
+        int rightDepth = depth(root, false);
+        if (leftDepth == rightDepth) return (1 << leftDepth) - 1;    //主要是这一步节省了时间
+        else return 1 + countNodes(root.right) + countNodes(root.left);
+    }
+
+    public int depth(TreeNode root, boolean left) {
+        int depth = 0;
+        while (root != null) {
+            root = left ? root.left : root.right; //三元表示式合并两个函数
+            depth++;
+        }
+        return depth;
+    }
+
+    //537. 复数乘法
+    public String complexNumberMultiply(String a, String b) {
+        int[] fir = getarr(a);
+        int[] sec = getarr(b);
+        StringBuffer sb = new StringBuffer();
+        sb.append(fir[0] * sec[0] - fir[1] * sec[1]).append('+').append(fir[0] * sec[1] + fir[1] * sec[0]).append('i');
+        return sb.toString();
+    }
+
+    public int[] getarr(String s) {
+        int index = s.indexOf('+');
+        int fir = Integer.parseInt(s.substring(0, index));
+        int sec = Integer.parseInt(s.substring(index + 1, s.length() - 1));
+        return new int[]{fir, sec};
+    }
+
+    //811. 子域名访问计数
+    public List<String> subdomainVisits(String[] cpdomains) {
+        Map<String, Integer> map = new HashMap<>();
+        for (String cpdomain : cpdomains) {
+            int time = Integer.parseInt(cpdomain.substring(0, cpdomain.indexOf(" ")));
+            cpdomain = cpdomain.substring(cpdomain.indexOf(" ") + 1);
+            String[] temp;
+            if (cpdomain.indexOf('.') != cpdomain.lastIndexOf('.')) {
+                temp = new String[3];
+                temp[0] = cpdomain;
+                temp[1] = cpdomain.substring(cpdomain.indexOf('.') + 1);
+                temp[2] = cpdomain.substring(cpdomain.lastIndexOf('.') + 1);
+            } else {
+                temp = new String[2];
+                temp[0] = cpdomain;
+                temp[1] = cpdomain.substring(cpdomain.indexOf('.') + 1);
+            }
+            for (String s : temp) {
+                Integer i = map.get(s);
+                if (i == null) i = 0;
+                map.put(s, time + i);
+            }
+        }
+        List<String> list = new ArrayList<>();
+        Iterator<Map.Entry<String, Integer>> it = map.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<String, Integer> e = it.next();
+            list.add(e.getValue() + " " + e.getKey());
+        }
+        return list;
+    }
+
+    //777. 在LR字符串中交换相邻字符
+    public boolean canTransform(String start, String end) {
+        int fir = 0;
+        int sec = 0;
+        int slen = start.length();
+        int elen = end.length();
+        while (fir < slen && sec < elen) {
+            while (fir < slen && start.charAt(fir) == 'X') fir++;
+            while (sec < elen && end.charAt(sec) == 'X') sec++;
+            if (fir == slen && sec == elen) return true;
+            if (fir == slen || sec == elen) return false;
+            if (start.charAt(fir) != end.charAt(sec)) return false;
+            if (start.charAt(fir) == 'L' && fir > sec) return false;
+            if (start.charAt(fir) == 'R' && fir < sec) return false;
+            fir++;
+            sec++;
+        }
+        return false;
+    }
+
+    public boolean canMeasureWater(int x, int y, int z) {
+        if (z == 0) return true;
+        if (x == 0 && y == 0 && z != 0) return false;
+        return (x + y) % z == 0;
+    }
+
+    public boolean isMatch(String s, String p) {
+        int slen = s.length();
+        int plen = p.length();
+        int fir = 0;
+        int sec = 0;
+        while (fir < slen && sec < plen) {
+            if (s.charAt(fir) != p.charAt(sec)) return false;
+            if (p.charAt(sec) == '*') {
+                sec++;
+                if (sec == plen) return true;
+                while (fir < slen && s.charAt(fir) != p.charAt(sec)) fir++;
+            }
+            if (p.charAt(sec) == '.') {
+                sec++;
+                fir++;
+            }
+        }
+        return fir == slen && sec == plen;
     }
 }
