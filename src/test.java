@@ -4487,4 +4487,92 @@ public class test {
             return c + " " + times;
         }
     }
+
+    //825. 适龄的朋友
+    public int numFriendRequests(int[] ages) {
+        int len = ages.length;
+        Arrays.sort(ages);
+        Map<Integer, Integer> times = new HashMap<>();
+        int count = 0;
+        for (int i = len - 1; i >= 0; i--) {
+            Integer time = times.get(ages[i]);
+            if (time != null) { //同龄人的请求数一样，已经统计过的年龄不需要再统计一次，这一步节省了时间
+                count += time;
+                continue;
+            }
+            time = 0;
+            for (int j = i - 1; j >= 0; j--) {
+                if (canNotSend(ages, i, j)) break;  //后面的年龄都不符合条件了
+                time++;
+            }
+            times.put(ages[i], time);
+            count += time;
+        }
+        return count;
+    }
+
+    public boolean canNotSend(int[] ages, int a, int b) {
+        return (ages[b] <= 0.5 * ages[a] + 7) || ages[b] > ages[a] || (ages[b] > 100 && ages[a] < 100);
+    }
+
+    //165. 比较版本号
+    public int compareVersion(String version1, String version2) {
+        String[] v1 = version1.split("[.]");
+        String[] v2 = version2.split("[.]");
+        int len = Math.max(v1.length, v2.length);
+        for (int i = 0; i < len; i++) {
+            Integer i1 = i < v1.length ? Integer.parseInt(v1[i]) : 0;
+            Integer i2 = i < v2.length ? Integer.parseInt(v2[i]) : 0;
+            if (i1.compareTo(i2) == 0) continue;
+            return i1.compareTo(i2);
+        }
+        return 0;
+    }
+
+    //662. Maximum Width of Binary Tree
+    public int widthOfBinaryTree(TreeNode root) {
+        int[] max = new int[1];
+        List<Integer> list = new ArrayList<>();
+        widthOfBinaryTree(root, 0, 1, list, max);
+        return max[0];
+    }
+
+    public void widthOfBinaryTree(TreeNode root, int depth, int index, List<Integer> start, int[] max) {
+        if (root == null) return;
+        else {
+            if (depth >= start.size()) start.add(index);
+            max[0] = Math.max(max[0], index - start.get(depth) + 1);
+            widthOfBinaryTree(root.left, depth + 1, 2 * index, start, max);
+            widthOfBinaryTree(root.right, depth + 1, 2 * index + 1, start, max);
+        }
+    }
+
+    //841. 钥匙和房间
+    public boolean canVisitAllRooms(List<List<Integer>> rooms) {
+        boolean[] locks = new boolean[rooms.size()];
+        Arrays.fill(locks, true);
+        locks[0] = false;
+        unlock(rooms, 0, locks);  //第一个房间默认开启
+        for (boolean lock : locks) {
+            if (lock) return false;
+        }
+        return true;
+    }
+
+    /**
+     * @param rooms
+     * @param index 开的房间
+     * @param locks 全部锁的记录
+     */
+    public void unlock(List<List<Integer>> rooms, int index, boolean[] locks) {
+        int len = locks.length;
+        List<Integer> keys = rooms.get(index);
+        //逐个获取房间的钥匙，遇到没有开过的房间，进入取得钥匙再出来
+        for (Integer key : keys) {
+            if (locks[key]) {
+                locks[key] = false;   //修改后进入递归，否则会重复进入一个房间，造成死循环
+                unlock(rooms, key, locks);
+            }
+        }
+    }
 }

@@ -501,13 +501,13 @@ public class test {
         return list.get(index);
     }
 
-    public void levelTrans(TreeNode root, List<List<Integer>> lists, int depth) {
+    public void levelTrans(TreeNode root, List<List<TreeNode>> lists, int depth) {
         if (root == null) return;
         depth++;
         if (lists.size() == depth) {
             lists.add(new ArrayList<>());
         }
-        lists.get(depth).add(root.val);
+        lists.get(depth).add(root);
         levelTrans(root.left, lists, depth);
         levelTrans(root.right, lists, depth);
     }
@@ -594,7 +594,7 @@ public class test {
     public List<Integer> largestValues(TreeNode root) {
         List<List<Integer>> lists = new ArrayList<>();
         List<Integer> temp = new ArrayList<>();
-        levelTrans(root, lists, -1);
+        //levelTrans(root, lists, -1);
         for (List<Integer> list : lists) {
             Collections.sort(list);
             temp.add(list.get(list.size() - 1));
@@ -690,15 +690,30 @@ public class test {
         return null;
     }
 
-    public void sum_of_node(TreeNode root, List<Integer> list) {
-
-    }
-
     public boolean isSameTree(TreeNode p, TreeNode q) {
         if (p == null && q == null) return true;
         else if (p == null && q != null) return false;
         else if (p != null && q == null) return true;
         return (p.val == q.val) && isSameTree(p.left, q.left) && isSameTree(p.right, q.right);
+    }
+
+    //865. 具有所有最深结点的最小子树
+    public TreeNode subtreeWithAllDeepest(TreeNode root) {
+        List<List<TreeNode>> lists = new ArrayList<>();
+        levelTrans(root, lists, -1);
+        List<TreeNode> list = lists.get(lists.size() - 1);
+        return lowestCommonAncestor(root, list);
+    }
+
+    public TreeNode lowestCommonAncestor(TreeNode root, List<TreeNode> list) {
+        if (root == null) return null;
+        for (TreeNode node : list) {
+            if (node.equals(root)) return root;
+        }
+        TreeNode left = lowestCommonAncestor(root.left, list);
+        TreeNode right = lowestCommonAncestor(root.right, list);
+        if (left != null && right != null) return root;    //p，q各分布在左右子树
+        return left == null ? right : left;   //都在左子树，或者右子树
     }
 
 }
